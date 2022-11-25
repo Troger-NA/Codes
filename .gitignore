@@ -1,129 +1,94 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+import pandas as pd
+import matplotlib.pyplot as plt
+import glob
+import numpy as np
+from matplotlib.ticker import AutoMinorLocator
+from pylab import *
+import matplotlib.cm as cm
 
-# C extensions
-*.so
+# Create dict With the name of txt datafiles. The function is label the plots
+solventes = { 31 : "Heptane",
+31.2 : "Methylcyclohexane",
+33.1 :"p-xylene",
+33.9:	"Toluen",
+34.5:	"Diethyl ether",
+36 :"dioxan",
+37.4 :"THF",
+38.1:	"Ethylacetate",
+39.1:	"CHCl3",
+40.7 :	"DCM",
+42:	"Acetone",
+43.2:	"DMF",
+45.1:	"DMSO",
+45.6:	"acetonitrile",
+47.1:	"2-Butanol",
+48.3:	"Octanol-1",
+51.9:	"Ethanol",
+55.4:	"Methanol",
+63.1:	"Water"
+}
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# PyInstaller
-#  Usually these files are written by a python script from a template
-#  before PyInstaller builds the exe, so as to inject date/other infos into it.
-*.manifest
-*.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
 
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
 
-# Translations
-*.mo
-*.pot
+############################
 
-# Django stuff:
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+fig, axes = plt.subplots(nrows=8, ncols=1, figsize=(3,10)) # Set the rows and cols you need
+fig.text(0.0005, 0.5, "Normalized Intensity(a.u)", va='center', rotation='vertical', fontsize=13, fontweight="bold")
+fig.text(0.2, 0.05, "Wavelenght (nm)", va='center', rotation='horizontal', fontsize=13, fontweight="bold")
+fig.subplots_adjust(hspace=0.02)
+plt.rcParams["axes.labelweight"] = "bold"
+# Creo dataframes vacios para luego meter los datos de X, Y y los nombres
+# De esta manera puedo hacer los subplots con zip(luego)
+data_you_needx=pd.DataFrame()
+data_you_needy=pd.DataFrame()
+data_you_needname=pd.DataFrame()
+# Leo los txt, y lleno los Dataframe con arrays.
+# La idea es agrupar todos los X, e Y en un solo array, requerimiento para zip
+for f in glob.glob("*.txt"):
+        df=pd.read_csv(f, delimiter="\t")
+        x = df.iloc[:,0] # Defino X como la columna de indice 0
+        y = df.iloc[:,2]
+        name = [solventes[float(f.rstrip(".txt"))]]
+        
+        data_you_needx = data_you_needx.append(x,ignore_index=True)
+        data_you_needy = data_you_needy.append(y,ignore_index=True)
+        data_you_needname = data_you_needname.append(name,ignore_index=True)
+       
+namearray = np.array(data_you_needname)
+xarray = np.array(data_you_needx)
+yarray = np.array(data_you_needy)
 
-# Flask stuff:
-instance/
-.webassets-cache
+# Comienzo a llenar los suplots con la data y seteo la estetica
+colors = cm.rainbow(np.linspace(0, 1, len(data_you_needname)))
+for ax, featurex, featurey, name, color in zip(axes.flatten(), xarray, yarray, namearray, colors):
 
-# Scrapy stuff:
-.scrapy
+     ax.plot(featurex, featurey, c=color, linewidth=1.5)
+     legend_properties = {'weight':'bold'}
+     ax.legend(name, loc=1, handlelength=0, frameon=0, prop=legend_properties,fontsize=1)
+      
+     ax.set_xticks(ticks=[]) 
+     
+     ax.set_yticks(ticks=[0,0.5,1], minor=True)
+     ax.set_yticks(ticks=[0,0.5,1], minor=False)  
+     ax.tick_params(axis='both', which='both', direction='in', pad=4)
+     ax.tick_params(axis='both', which='minor', size=2 )
+     ax.tick_params(axis='both', which='major', size=3, width= 1)
+     ax.set_xlim(450,700)
+     ax.set_ylim(0,1.5)
+    #  ax.set_yticks(0,2)
+     ax.spines['right'].set_visible(False)
+     ax.spines['top'].set_visible(False)
+     plt.rcParams["axes.labelweight"] = "bold"
+     plt.xticks(fontweight="bold")
+#      plt.xlabel(xlabelname, fontsize=13, fontweight="bold")
 
-# Sphinx documentation
-docs/_build/
 
-# PyBuilder
-target/
+ax.set_xticks(ticks=range(400,800,50), minor=True)  
+ax.set_xticks(ticks=range(420,820,100)) 
+# fig.tight_layout()
+fig.savefig('all.png', format='png', dpi=600)
+fig.savefig('all.pdf', format='pdf', dpi=600)
 
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
-#   However, in case of collaboration, if having platform-specific dependencies or dependencies
-#   having no cross-platform support, pipenv may install dependencies that don't work, or not
-#   install all needed dependencies.
-#Pipfile.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow
-__pypackages__/
-
-# Celery stuff
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre type checker
-.pyre/
+plt.show()
